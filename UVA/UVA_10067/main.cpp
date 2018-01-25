@@ -1,109 +1,129 @@
-#include <iostream>
-#include <vector>
-#include <algorithm>
-
-#define MAXN 1000
-
+#include <bits/stdc++.h>
 using namespace std;
 
-vector<int> init(4);
-vector<int> target(4);
-vector<vector<int> > forb;
-bool mark[4];
-int mmin, cnt;
 
-void clean() {
-	for(int i = 0; i < 4; i++) {
-		init[i] = target[i] = mark[i] = 0;
-	}
-	forb.clear();
-	mmin = MAXN;
+#define NMAX 100000 + 10
+typedef vector<int> vi;
+
+
+void leerV(vector<int> &v) {
+
+	for(int i=0; i<4; i++)
+		cin >> v[i];
+
 }
 
-bool check(vector<int> act) {
-	for(int i = 0; i < act.size(); i++) {
-		bool flag = true;
-		for(int j = 0; j < 4; j++) {
-			if(act[j] != forb[i][j]) {
-				flag = false;
-				break;
-			}
-		}
-		if(flag) {
-			return true;
-		}
-	}
 
-	return false;
+void coutV(vector<int> &v) {
+
+	for(int i=0; i<4; i++)
+		cout << v[i] << ' ';
+
+	cout << endl;
+
 }
 
-void solve(vector<int> act, int n) {
-	if(n == 4) {
-		cout << cnt << endl;
-		mmin = min(mmin, cnt);
-	}
-	for(int i = 0; i < 4; i++) {
-		if(mark[i]) {
-			continue;
-		}
-		if(n == 0) {
-			cnt = 0;
-		}
-		bool fl = false, fr = false;
-		int cl = 0, cr = 0;
-		int aux = act[i];
-		for(int j = aux; j != target[i]; j = (j + 1) % 10, cr++) {
-			//cout << j << endl;
-			act[i] = j;
-			if(check(act)) {
-				fr = true;
-				break;
-			}
-		}
-		for(int j = aux; j != target[i]; j = (j - 1 + 10) % 10, cl++) {
-			act[i] = j;
-			if(check(act)) {
-				fl = true;
-				break;
-			}
-		}
-		if(fr == true && fl == true) {
-			continue;
-		}
 
-		act[i] = target[i];
-		mark[i] = true;
-		solve(act, n + 1);
-		act[i] = aux;
-		mark[i] = false;
-		cnt += min(cr, cl);
-	}
+int v2int(vector<int> &v) {
+
+	int ans = 0;
+
+	for(int i=0; i<4; i++)
+		ans += v[i]*pow(10, 3-i);
+
+	return ans;
+
+}
+
+
+vector<int> mueve(vi v, int i, int di) {
+
+	v[i] = (v[i] + di + 10)%10;
+
+	return v;
+
 }
 
 int main() {
-	//ios_base::sync_with_stdio(0);
-	//cin.tie(0);
 
+	ios_base::sync_with_stdio(0);
+	cin.tie(0);
+
+	int visitado[NMAX], ok[NMAX];
 	int n, m;
 	cin >> n;
 	while(n--) {
-		clean();
-		for(int i = 0; i < 4; i++) {
-			cin >> init[i];
-		}
-		for(int i = 0; i < 4; i++) {
-			cin >> target[i];
-		}
+
+		vector<int> si(4), sf(4), ss(4);
+		memset(visitado, -1, sizeof(visitado));
+		memset(ok, 1, sizeof(ok));
+
+		leerV(si);
+		leerV(sf);
+
+		//coutV(si);
+		//coutV(sf);
+
+		int target = v2int(sf);
+
+		//cout << target << endl;
+
 		cin >> m;
-		for(int i = 0; i < m; i++) {
-			vector<int> vaux(4);
-			for(int j = 0; j < 4; j++) {
-				cin >> vaux[j];
-			}
-			forb.push_back(vaux);
+
+		for(int i=0; i<m; i++) {
+
+			leerV(ss);
+			ok[v2int(ss)] = 0;
+
 		}
-		solve(init, 0);
-		cout << mmin << endl;
+
+		queue<vector<int> > S;
+
+		S.push(si);
+		visitado[v2int(si)] = 0;
+
+		while(!S.empty()) {
+
+			ss = S.front();
+			S.pop();
+
+			int intSS = v2int(ss);
+
+			if(intSS == target)
+				break;
+
+
+			for(int i=0; i<4; i++) {
+
+				vi ns = mueve(ss, i, 1);
+				int num = v2int(ns);
+
+				if(ok[num] && visitado[num] == -1) {
+
+					S.push(ns);
+					visitado[num] = visitado[intSS] + 1;
+
+
+				}
+
+				ns = mueve(ss, i, -1);
+				num = v2int(ns);
+
+				if(ok[num] && visitado[num] == -1) {
+
+					S.push(ns);
+					visitado[num] = visitado[v2int(ss)] + 1;
+
+
+				}
+
+			}
+
+
+		}
+
+		cout << visitado[target] << '\n';
+
 	}
 
 	return 0;
